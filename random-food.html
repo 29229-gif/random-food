@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบแนะนำเมนูอาหารจากวัตถุดิบ</title>
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #f4f6f9; padding: 20px; text-align: center; }
+        .container { max-width: 500px; background: white; padding: 20px; margin: 0 auto; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .ingredients-option { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; }
+        label { background: #eef2f7; padding: 8px 14px; border-radius: 20px; cursor: pointer; user-select: none; }
+        input[type="checkbox"]:checked + span { font-weight: bold; color: #2e7d32; }
+        button { background-color: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        #result { margin-top: 20px; text-align: left; background: #fafafa; padding: 15px; border-radius: 8px; border-left: 5px solid #4CAF50; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🍳 เลือกวัตถุดิบที่มีในตู้เย็น</h2>
+    
+    <div class="ingredients-option">
+        <label><input type="checkbox" value="ไข่ไก่"> <span>ไข่ไก่</span></label>
+        <label><input type="checkbox" value="หมูสับ"> <span>หมูสับ</span></label>
+        <label><input type="checkbox" value="หมูกรอบ"> <span>หมูกรอบ</span></label>
+        <label><input type="checkbox" value="ใบกะเพรา"> <span>ใบกะเพรา</span></label>
+        <label><input type="checkbox" value="กระเทียม"> <span>กระเทียม</span></label>
+        <label><input type="checkbox" value="ต้นหอม"> <span>ต้นหอม</span></label>
+    </div>
+
+    <button onclick="findRecipe()">ค้นหาเมนูอาหาร</button>
+
+    <div id="result" style="display: none;">
+        <h3 id="recipe-name"></h3>
+        <p><strong>วัตถุดิบที่ใช้:</strong> <span id="recipe-ingredients"></span></p>
+        <p><strong>วิธีทำเบื้องต้น:</strong> <span id="recipe-steps"></span></p>
+    </div>
+</div>
+
+<script>
+    // 1. ฐานข้อมูลเมนูอาหาร (สามารถเพิ่มเมนูตรงนี้ได้)
+    const recipes = [
+        {
+            name: "ผัดกะเพราหมูสับ",
+            ingredients: ["หมูสับ", "ใบกะเพรา", "กระเทียม"],
+            steps: "โขลกกระเทียมกับพริก ผัดกับหมูสับจนสุก ปรุงรส แล้วใส่ใบกะเพราเป็นขั้นตอนสุดท้าย"
+        },
+        {
+            name: "ไข่เจียวทรงเครื่อง",
+            ingredients: ["ไข่ไก่", "หมูสับ", "ต้นหอม"],
+            steps: "ตีไข่ไก่ใส่หมูสับและต้นหอม ปรุงรสตามใจชอบ นำไปทอดในน้ำมันร้อนๆ ให้เหลืองฟู"
+        },
+        {
+            name: "ผัดกะเพราหมูกรอบ",
+            ingredients: ["หมูกรอบ", "ใบกะเพรา", "กระเทียม"],
+            steps: "ผัดกระเทียมให้หอม ใส่หมูกรอบลงไป ปรุงรสชาติ แล้วใส่ใบกะเพราผัดเร็วๆ พร้อมเสิร์ฟ"
+        },
+        {
+            name: "ไข่ดาวกระเทียมกรอบ",
+            ingredients: ["ไข่ไก่", "กระเทียม"],
+            steps: "เจียวกระเทียมให้เหลืองหอมพักไว้ จากนั้นทอดไข่ดาว แล้วโรยกระเทียมเจียวด้านบน"
+        }
+    ];
+
+    // 2. ฟังก์ชั่นค้นหาเมนู
+    function findRecipe() {
+        // ดึงค่าวัตถุดิบที่ผู้ใช้เช็กเลือก
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const selectedIngredients = Array.from(checkboxes).map(cb => cb.value);
+
+        if (selectedIngredients.length === 0) {
+            alert("กรุณาเลือกวัตถุดิบอย่างน้อย 1 อย่างครับ");
+            return;
+        }
+
+        // ค้นหาเมนูที่มีวัตถุดิบตรงกับที่เลือกอย่างน้อย 1 อย่าง
+        const matchedRecipes = recipes.filter(recipe => 
+            recipe.ingredients.some(item => selectedIngredients.includes(item))
+        );
+
+        const resultDiv = document.getElementById('result');
+
+        if (matchedRecipes.length > 0) {
+            // สุ่มเลือกมา 1 เมนูจากรายการที่เข้าข่าย
+            const randomRecipe = matchedRecipes[Math.floor(Math.random() * matchedRecipes.length)];
+            
+            document.getElementById('recipe-name').innerText = randomRecipe.name;
+            document.getElementById('recipe-ingredients').innerText = randomRecipe.ingredients.join(', ');
+            document.getElementById('recipe-steps').innerText = randomRecipe.steps;
+            resultDiv.style.display = 'block';
+        } else {
+            document.getElementById('recipe-name').innerText = "ไม่พบเมนูที่ตรงกัน";
+            document.getElementById('recipe-ingredients').innerText = "-";
+            document.getElementById('recipe-steps').innerText = "ลองเลือกวัตถุดิบเพิ่มเติม หรือเพิ่มรายการเมนูในระบบดูครับ";
+            resultDiv.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>
